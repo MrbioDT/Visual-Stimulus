@@ -1,6 +1,6 @@
 // this is the code Paul sent to me, annotated by Yang with notes and questions
 // modified to delete auditory and include visual cues
-// updated 2020.05.02
+// updated 2020.05.04 working version with vis_2a.py, vis_2a.ino 
 
 //Q. run the code and see how it works?
 //Q. why functions are defined at bottom? running sequence?
@@ -33,8 +33,8 @@ boolean habBOn = false;
 boolean conAOn = false;
 boolean conBOn = false;
 boolean trialON = false;
-long sounddur=10000;
-long itidur=30000;
+long sounddur=15000;
+long itidur=20000;
 long soundvar=0;
 long itivar=0;
 long pretrial=30000;
@@ -50,6 +50,7 @@ int reward = 0;
 volatile boolean sta = false;
 int stage=1;
 int vis = 51; // dt-tag, the pin used to trigger visual stimulus
+int vis2 = 23; //dt-tag
 
 //part2. define session //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void setup() {
@@ -69,19 +70,20 @@ digitalWrite(opto,LOW);
 digitalWrite(air,LOW);
 pinMode(vis,OUTPUT); //dt-tag
 digitalWrite(vis,LOW); //dt-tag
+pinMode(vis2,OUTPUT); //dt-tag
+digitalWrite(vis2,LOW); //dt-tag
 }
 
 //part3. implementation  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void loop() {
 
-///////////////part3.1 updated the serial monitor
+//part3.1 updated the serial monitor
 String statusreport = String(millis(),DEC) + ';' + String(encoder,DEC) + ';' + sta + ';'+ String(sound,DEC) + ';' +String(reward,DEC)+ ';' +String(trialON,DEC);
 // millis() Returns the number of milliseconds passed since the Arduino board began running the current program
 Serial.println(statusreport);  
-
-///////////////part3.2 ??? lick for what???
+  
 //Lick = water
-if (counter >= 8){
+if (counter >= 8 || trialON){
    reward = 1;
    digitalWrite(water,HIGH);
    counter = 0;
@@ -90,7 +92,6 @@ if (counter >= 8){
 //Lick = water end 
 
 
-///////////////part3.3 ??? what is this millis and prexxx session for???
 if (millis()>pret + 10)
 {
   digitalWrite(water,LOW);
@@ -115,8 +116,6 @@ if (millis()>prea + 2400)
   }
 }
 
-
-///////////////part3.4 serial input command!
 //////////////////////////////////Serial input control////////////////////////////////////////
 if (stringComplete){
     if (inputString == '1'){
@@ -154,11 +153,19 @@ if (stringComplete){
       conBOn = !conBOn;
       preh = millis();
       }
-    else if (inputString == '9'){ //dt-tag, created by Yang
+    else if (inputString == '9'){
+      trialON = !trialON;
+      }
+    else if (inputString == 'h'){ //dt-tag, created by Yang
       digitalWrite(vis,HIGH);
-      prea = millis(); //Q. what is this prea for???
-      delay(1000);
+  //    prea = millis(); //Q. what is this prea for???
+      delay(500);
       digitalWrite(vis,LOW);
+      }
+    else if (inputString == 'v'){ //dt-tag, created by Yang
+      digitalWrite(vis2,HIGH);
+      delay(500);
+      digitalWrite(vis2,LOW);
       }
       
 inputString = '0';
@@ -166,18 +173,18 @@ stringComplete = false;
 }
 //////////////////////////////////////End of Serial input control////////////////////////////
 
-///////////////part3.5 auditory cues session
-//Auditory cueB module
+//visual cueB module
 if (cueBON == true){
   sound = 2;
+//  digitalWrite(vis,HIGH);
 //delay(50);
-  if (millis()>pre_high){
-  toneAC(12000);
-  }
-  if (millis()>pre_high+250){
-    noToneAC();
-    pre_high=pre_high+500;
-  }
+//  if (millis()>pre_high){
+//  toneAC(12000);
+//  }
+//  if (millis()>pre_high+250){
+//    noToneAC();
+//    pre_high=pre_high+500;
+//  }
 }
 if (cueBON == false){
   if(sound==2) {sound = 0; noToneAC();}
@@ -188,34 +195,34 @@ if (cueBON == false){
 if (cueAON == true){
   sound = 1;
 //delay(50);
-  if (grad==0){
-    toneAC(4000);
-      if (millis()>pre_low + 500){
-        pre_low = millis();
-        grad = 1;
-      }
-  }
-  if (grad==1){
-    toneAC(5000);
-      if (millis()>pre_low + 500){
-        pre_low = millis();
-        grad = 2;
-      }
-  }
-  if (grad==2){
-    toneAC(6000);
-      if (millis()>pre_low + 500){
-        pre_low = millis();
-        grad = 3;
-      }
-  }
-  if (grad==3){
-    toneAC(6500);
-      if (millis()>pre_low + 500){
-        pre_low = millis();
-        grad = 0;
-      }
-  }  
+//  if (grad==0){
+//    toneAC(4000);
+//      if (millis()>pre_low + 500){
+//        pre_low = millis();
+//        grad = 1;
+//      }
+//  }
+//  if (grad==1){
+//    toneAC(5000);
+//      if (millis()>pre_low + 500){
+//        pre_low = millis();
+//        grad = 2;
+//      }
+//  }
+//  if (grad==2){
+//    toneAC(6000);
+//      if (millis()>pre_low + 500){
+//        pre_low = millis();
+//        grad = 3;
+//      }
+//  }
+//  if (grad==3){
+//    toneAC(6500);
+//      if (millis()>pre_low + 500){
+//        pre_low = millis();
+//        grad = 0;
+//      }
+//  }  
 }
 if (cueAON == false){
   if(sound==1) {sound = 0; noToneAC();}
@@ -223,18 +230,22 @@ if (cueAON == false){
 //cueA module end
 
 
-///////////////part3.6 habituation session??? how does this work???
 //habituation shcedule A, A*3, B*3, A*2, B*2, A*1, B*1
 if (habAOn==true){
    trialON=true;
 
       if ((stage==1 or stage==2 or stage==3 or stage==7 or stage==8 or stage==11)&&(millis()>preh+pretrial)&&(!command)){
            cueAON=true;
-           //soundvar=random(-2000,2000);
+           digitalWrite(vis,HIGH);
+         //  soundvar=random(-2000,2000);
+           soundvar=0;
            itivar=random(-10000,10000);
            pre_low=millis();
            preS=millis();
            command=true;
+           }
+       if ((stage==1 or stage==2 or stage==3 or stage==7 or stage==8 or stage==11)&&(millis()>preh+pretrial)&&(command)){
+           digitalWrite(vis,LOW);
            }
       if ((stage==1 or stage==2 or stage==3 or stage==7 or stage==8 or stage==11)&&(millis()>preS+sounddur+soundvar)&&(command)){
            cueAON=false;
@@ -244,12 +255,18 @@ if (habAOn==true){
            }
       if ((stage==4 or stage==5 or stage==6 or stage==9 or stage==10 or stage==12)&&(millis()>preh+pretrial)&&(!command)){
            cueBON=true;
-           soundvar=random(-2000,2000);
+           digitalWrite(vis2,HIGH);
+          // soundvar=random(-2000,2000);
+           soundvar=0;
            itivar=random(-10000,10000);
            pre_high=millis();
            preS=millis();
            command=true;
-           }       
+           }
+      if ((stage==4 or stage==5 or stage==6 or stage==9 or stage==10 or stage==12)&&(millis()>preh+pretrial)&&(command)){
+           digitalWrite(vis2,LOW);
+           }
+                     
        if ((stage==4 or stage==5 or stage==6 or stage==9 or stage==10 or stage==12)&&(millis()>preS+sounddur+soundvar)&&(command)){
            cueBON=false;
            preh=preh+sounddur+itidur+soundvar+itivar;
@@ -268,12 +285,18 @@ if (habBOn==true){
    trialON=true;
       if ((stage==1 or stage==2 or stage==3 or stage==7 or stage==8 or stage==11)&& (millis()>preh+pretrial)&&(!command)){
            cueBON=true;
-           soundvar=random(-2000,2000);
+           digitalWrite(vis2,HIGH);
+           //soundvar=random(-2000,2000);
+           soundvar=0;
            itivar=random(-10000,10000);
            pre_high=millis();
            preS=millis();
            command=true;
            }
+      if ((stage==1 or stage==2 or stage==3 or stage==7 or stage==8 or stage==11)&& (millis()>preh+pretrial)&&(command)){
+          digitalWrite(vis2,LOW);
+           }
+           
       if ((stage==1 or stage==2 or stage==3 or stage==7 or stage==8 or stage==11)&&(millis()>preS+sounddur+soundvar)&&(command)){
            cueBON=false;
            preh=preh+sounddur+itidur+soundvar+itivar;
@@ -282,12 +305,18 @@ if (habBOn==true){
            }
       if ((stage==4 or stage==5 or stage==6 or stage==9 or stage==10 or stage==12)&&(millis()>preh+pretrial)&&(!command)){
            cueAON=true;
-           soundvar=random(-2000,2000);
+           digitalWrite(vis,HIGH);
+           //soundvar=random(-2000,2000);
+           soundvar=0;
            itivar=random(-10000,10000);
            pre_low=millis();
            preS=millis();
            command=true;
-           }       
+           }
+      if ((stage==4 or stage==5 or stage==6 or stage==9 or stage==10 or stage==12)&&(millis()>preh+pretrial)&&(command)){
+           digitalWrite(vis,LOW);
+           }     
+         
        if ((stage==4 or stage==5 or stage==6 or stage==9 or stage==10 or stage==12)&&(millis()>preS+sounddur+soundvar)&&(command)){
            cueAON=false;
            preh=preh+sounddur+itidur+soundvar+itivar;
@@ -301,7 +330,6 @@ if (habBOn==true){
 }  
 //END of habituation schedule B
 
-///////////////part3.7 conditioning session??? how does this work???
 //condition shcedule A, B*4, A*4, B*4, A*4, B*4, A*4
 if (conAOn==true){
    trialON=true;
@@ -427,8 +455,6 @@ if (conBOn==true){
 }
 ////////////void loop() function ends here/////////////////////
 
-
-//part4. unknown defined functions here  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void encoderPinChangeA() {
 encoder += digitalRead(encoder_a) == digitalRead(encoder_b) ? -1 : 1;
 }

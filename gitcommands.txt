@@ -1,0 +1,10 @@
+git init - creates .git hidden folder so that I can track future changes with git to this directory
+git status - shows changed files since last commit
+git log - shows the names of all the commits
+git diff - very useful, changes since last commit
+git add <names of file> - stage a file to prepare it to be commited
+git add -A - stage all files
+git commit -m 'some message' - makes a commit or sometimes called "snapshot"
+git remote add origin <some URL> - adds a remote endpoint
+git push origin master - pushes to a remote called "origin" (which is usually an alias for Github)
+
