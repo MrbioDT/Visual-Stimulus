@@ -1,3 +1,16 @@
+'''
+updated 2020.05.01
+This code communicate with visual_grating_pin.ino(arduino), take the input from arduino digitalPin and control the psychopy to generate visuasl stimulus accordingly
+
+Features
+*input from adruino pin not serial monitor
+*visual grating is drifting
+
+ReadMe
+*modified based on visual_grating_drifting.py
+*upload and run the arduino code first and then run the python code
+'''
+
 
 import serial
 from psychopy import visual, core
@@ -23,7 +36,7 @@ def VisGrat_drifting(orientation):
 if __name__ == "__main__":
 
     # [USER INPUT HERE] set variables for serial communication
-    port = '/dev/cu.usbmodem142401'
+    port = '/dev/cu.usbmodem141301'
     baud_rate = 9600
 
     ser = serial.Serial(port, baud_rate, timeout=1)  # start serial communication
