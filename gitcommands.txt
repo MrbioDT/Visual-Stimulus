@@ -7,4 +7,8 @@ git add -A - stage all files
 git commit -m 'some message' - makes a commit or sometimes called "snapshot"
 git remote add origin <some URL> - adds a remote endpoint
 git push origin master - pushes to a remote called "origin" (which is usually an alias for Github)
-
+git checkout hashcode   - find the hashcode of that commit
+git checkout master   - go back to the top of branch
+git checkout filename  - restore the file(version in your current commit) 
+git stash -u   - remove all my changes since last commit, save them in a stash
+git stash pop   - get back the thing I've stashed

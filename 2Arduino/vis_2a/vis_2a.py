@@ -41,9 +41,15 @@ if __name__ == "__main__":
     while True: #This while loop keeps updating the command until visual stimlus is displayed
 
        ser = serial.Serial(port, baud_rate, timeout=1)  # start serial communication
-       command = str(ser.readline().decode('ascii'))
+
+       try:
+          command = str(ser.readline().decode('ascii'))
+       except:
+          command = str(ser.readline())
+          print(ser.readline(), '****************************error****************************')
+
        print("Message from arduino: ", command)
-       timeout = time.time() + 3  # seconds, duration of visual stimulus
+       timeout = time.time() + 15  # seconds, duration of visual stimulus
 
        if '7' in command:  #display horizontal stimulus
            while True:

@@ -1,4 +1,4 @@
-//updated 2020.05.02
+//updated 2020.05.04
 //This code communicate with visual_grating_drifting_pin.py, gives 1/0 from arduino digitalPin and control the psychopy to generate visuasl stimulus accordingly
 
 
