@@ -1,5 +1,5 @@
 '''
-updated 2020.05.04
+updated 2020.05.05
 This code communicate with visual_grating_pin.ino(arduino), take the input from arduino digitalPin and control the psychopy to generate visuasl stimulus accordingly
 
 Features
@@ -46,7 +46,7 @@ if __name__ == "__main__":
           command = str(ser.readline().decode('ascii'))
        except:
           command = str(ser.readline())
-          print(ser.readline(), '****************************error****************************')
+          print(command, '****************************error****************************')
 
        print("Message from arduino: ", command)
        timeout = time.time() + 15  # seconds, duration of visual stimulus
