@@ -61,10 +61,10 @@ if __name__ == "__main__":
                win0.flip()
 
                ###smooth upate time
-               frametime1 = (time.time()-temp_time)*1000 # ms
+               frametime = (time.time()-temp_time)*1000 # ms
                temp_time=time.time()
                if frametime >= 21:
-                  print('this frame takes: ', frametime1, ' ms')
+                  print('this frame takes: ', frametime, ' ms')
 
        elif '23' in command: #display vertical stimulus
            while True:
@@ -75,10 +75,10 @@ if __name__ == "__main__":
                win0.flip()
 
                ###smooth upate time
-               frametime1 = (time.time()-temp_time)*1000 # ms
+               frametime = (time.time()-temp_time)*1000 # ms
                temp_time=time.time()
                if frametime >= 21:
-                  print('this frame takes: ', frametime1, ' ms')
+                  print('this frame takes: ', frametime, ' ms')
        else:
           myCentre.draw() #just black screen
 

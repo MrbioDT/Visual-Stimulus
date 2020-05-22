@@ -1,10 +1,12 @@
 '''
 updated 2020.05.05
 This code communicate with visual_grating_pin.ino(arduino), take the input from arduino digitalPin and control the psychopy to generate visuasl stimulus accordingly
+
 Features
 *start with black screen
 *in master arduino serial monitor, type 'v'/'h' and this python program give vertical/horizontal stimulus
 *visual grating is drifting
+
 ReadMe
 *modified based on visual_grating_drifting.py
 *upload and run the arduino code first and then run the python code
@@ -12,13 +14,13 @@ ReadMe
 
 
 import serial
-from psychopy import visual, monitors
+from psychopy import visual, monitors, logging
 import time
 
 if __name__ == "__main__":
 
     #set variables for serial communication
-    port = '/dev/cu.usbmodem144301'
+    port = '/dev/cu.usbmodem142301'
     baud_rate = 9600
 
     # visual stimulus session
@@ -35,8 +37,26 @@ if __name__ == "__main__":
                               lineColor=[-1, -1, -1], fillColor=[-1, -1, -1], pos=[0, 0])
     frametime = win0.getMsPerFrame(nFrames=60, showVisual=False, msg='', msDelay=0.0)[0]       # return the time(ms) per frame
 
+    print("*************************", frametime)
+
+    # ###debug session###
+    # win0.recordFrameIntervals = True
+    #
+    # # By default, the threshold is set to 120% of the estimated refresh
+    # # duration, but arbitrary values can be set.
+    # #
+    # # I've got 85Hz monitor and want to allow 4 ms tolerance; any refresh that
+    # # takes longer than the specified period will be considered a "dropped"
+    # # frame and increase the count of win.nDroppedFrames.
+    # win0.refreshThreshold = (2/float(1000/frametime))/1000
+
 
     while True: #This while loop keeps updating the command until visual stimlus is displayed
+
+       # # Set the log module to report warnings to the standard output window
+       # # (default is errors only).
+       # logging.console.setLevel(logging.WARNING)
+       # print('Overall, %i frames were dropped.' % win0.nDroppedFrames)
 
        ser = serial.Serial(port, baud_rate, timeout=1)  # start serial communication
 
@@ -49,36 +69,33 @@ if __name__ == "__main__":
        print("Message from arduino: ", command)
        timeout = time.time() + 15  # seconds, duration of visual stimulus
 
-       ###smooth session
-       temp_time = time.time()
-
-       if '7' in command:  #display horizontal stimulus
+       if '7' in command:  # display horizontal stimulus
+           timestamp = time.time()
+           step = frametime/float(1000)
            while True:
                if time.time() > timeout:
                    break
-               grat_stim_h.setPhase(2/float(1000/frametime),'+')  # speed of visual stimulus: advance phase by '2/float(1000/frametime)' of a cycle, '-' is opposite directions
+               grat_stim_h.setPhase(2 / float(1 / step), '+')  # speed of visual stimulus: advance phase by '2/float(1000/frametime)' of a cycle, '-' is opposite directions
                grat_stim_h.draw()
+               timestamp = time.time()
+               step = time.time()-timestamp
+               if step > 0.03:
+                  print(step)
+
                win0.flip()
-
-               ###smooth upate time
-               frametime1 = (time.time()-temp_time)*1000 # ms
-               temp_time=time.time()
-               if frametime >= 21:
-                  print('this frame takes: ', frametime1, ' ms')
-
-       elif '23' in command: #display vertical stimulus
+       elif '23' in command:  # display vertical stimulus
+           timestamp = time.time()
            while True:
                if time.time() > timeout:
                    break
                grat_stim_v.setPhase(2 / float(1000 / frametime),'+')  # speed of visual stimulus: advance phase by '2/float(1000/frametime)' of a cycle, '-' is opposite directions
                grat_stim_v.draw()
-               win0.flip()
 
-               ###smooth upate time
-               frametime1 = (time.time()-temp_time)*1000 # ms
-               temp_time=time.time()
-               if frametime >= 21:
-                  print('this frame takes: ', frametime1, ' ms')
+               step = time.time() - timestamp
+               if step > 0.03:
+                   print(step)
+
+               win0.flip()
        else:
           myCentre.draw() #just black screen
 
